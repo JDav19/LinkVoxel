@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128/examples/js/loaders/GLTFLoader.js"></script>
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            let scene, camera, renderer, model;
+            let isDragging = false;
+            let previousMousePosition = { x: 0, y: 0 };
+            let rotationY = 0;
+            let rotationX = 0;
+
+            function init() {
+                // Crear la escena
+                scene = new THREE.Scene();
+
+                // Crear la cámara
+                camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 100);
+                camera.position.set(0, 1, 5); // Posición inicial
+
+                // Renderizador
+                renderer = new THREE.WebGLRenderer({ antialias: true });
+                renderer.setSize(window.innerWidth, window.innerHeight);
+                document.body.appendChild(renderer.domElement);
+
+                // Luz ambiental
+                let ambientLight = new THREE.AmbientLight(0xffffff, 1);
+                scene.add(ambientLight);
+
+                // Luz direccional
+                let directionalLight = new THREE.DirectionalLight(0xffffff, 1);
+                directionalLight.position.set(5, 5, 5);
+                scene.add(directionalLight);
+
+                // Cargar modelo GLB
+                let loader = new THREE.GLTFLoader();
+                loader.load("models/link.glb", function (gltf) {
+                    model = gltf.scene;
+                    model.scale.set(45, 45, 45);
+                    model.position.set(0, 0, 0);
+                    scene.add(model);
+                });
+
+                // Evento para redimensionar la pantalla
+                window.addEventListener("resize", function () {
+                    camera.aspect = window.innerWidth / window.innerHeight;
+                    camera.updateProjectionMatrix();
+                    renderer.setSize(window.innerWidth, window.innerHeight);
+                });
+
+                animate();
+            }
+
+            function animate() {
+                requestAnimationFrame(animate);
+
+                // Aplicar rotación a la cámara
+                let radius = 5; // Distancia de la cámara al modelo
+                let radY = THREE.MathUtils.degToRad(rotationY);
+                let radX = THREE.MathUtils.degToRad(rotationX);
+
+                camera.position.x = radius * Math.sin(radY) * Math.cos(radX);
+                camera.position.z = radius * Math.cos(radY) * Math.cos(radX);
+                camera.position.y = radius * Math.sin(radX);
+                camera.lookAt(0, 0, 0); // Apuntar siempre al modelo
+
+                renderer.render(scene, camera);
+            }
+
+            // Manejo del mouse
+            document.addEventListener("mousedown", function (e) {
+                if (e.button === 0) {
+                    isDragging = true;
+                    previousMousePosition = { x: e.clientX, y: e.clientY };
+                }
+            });
+
+            document.addEventListener("mouseup", function () {
+                isDragging = false;
+            });
+
+            document.addEventListener("mousemove", function (e) {
+                if (!isDragging) return;
+                let deltaX = e.clientX - previousMousePosition.x;
+                let deltaY = e.clientY - previousMousePosition.y;
+
+                rotationY -= deltaX * 0.5; // Rotación horizontal
+                rotationX -= deltaY * 0.5; // Rotación vertical
+                rotationX = Math.max(-45, Math.min(45, rotationX)); // Limitar inclinación
+
+                previousMousePosition = { x: e.clientX, y: e.clientY };
+            });
+
+            init();
+        });
+    </script>
+</head>
+<body style="margin: 0; overflow: hidden;"></body>
+</html>
