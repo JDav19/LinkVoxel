@@ -42,15 +42,6 @@
                     scene.add(model);
                 });
 
-                // Orbit controls
-                controls = new THREE.OrbitControls(camera, renderer.domElement);
-                controls.enableDamping = true; // Suaviza el movimiento
-                controls.dampingFactor = 0.05;
-                controls.screenSpacePanning = false;
-                controls.minDistance = 2;  // Distancia mínima de zoom
-                controls.maxDistance = 10; // Distancia máxima de zoom
-                controls.maxPolarAngle = Math.PI / 2; // Evita voltear la cámara
-
                 // Evento para redimensionar la pantalla
                 window.addEventListener("resize", function () {
                     camera.aspect = window.innerWidth / window.innerHeight;
