@@ -92,6 +92,34 @@
                 previousMousePosition = { x: e.clientX, y: e.clientY };
             });
 
+            // Manejo del tacto (touch)
+            document.addEventListener("touchstart", function (e) {
+                if (e.touches.length === 1) {
+                    isDragging = true;
+                    previousMousePosition = { x: e.touches[0].clientX, y: e.touches[0].clientY };
+                    e.preventDefault(); // Evitar el desplazamiento de la página
+                }
+            });
+
+            document.addEventListener("touchmove", function (e) {
+                if (!isDragging || e.touches.length !== 1) return;
+                
+                let touch = e.touches[0];
+                let deltaX = touch.clientX - previousMousePosition.x;
+                let deltaY = touch.clientY - previousMousePosition.y;
+
+                rotationY -= deltaX * 0.5; // Rotación horizontal
+                rotationX -= deltaY * 0.5; // Rotación vertical
+                rotationX = Math.max(-45, Math.min(45, rotationX)); // Limitar inclinación
+
+                previousMousePosition = { x: touch.clientX, y: touch.clientY };
+                e.preventDefault(); // Evitar el desplazamiento de la página
+            });
+
+            document.addEventListener("touchend", function () {
+                isDragging = false;
+            });
+
             init();
         });
     </script>
