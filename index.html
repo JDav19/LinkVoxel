@@ -3,6 +3,7 @@
 <head>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/three@0.128/examples/js/loaders/GLTFLoader.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128/examples/js/webxr/XRButton.js"></script>
     <script>
         document.addEventListener("DOMContentLoaded", function () {
             let scene, camera, renderer, model;
@@ -14,6 +15,7 @@
             function init() {
                 // Crear la escena
                 scene = new THREE.Scene();
+                scene.background = new THREE.Color(0x808080); // Color fondo
 
                 // Crear la cámara
                 camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 100);
@@ -41,6 +43,15 @@
                     model.position.set(0, 0, 0);
                     scene.add(model);
                 });
+
+                // Controlador AR (para colocar el modelo en AR)
+                controller = renderer.xr.getController(0);
+                controller.addEventListener("select", function () {
+                    if (model) {
+                        model.position.set(0, 0, -1); // Mueve el modelo a la posición correcta
+                    }
+                });
+                scene.add(controller);
 
                 // Evento para redimensionar la pantalla
                 window.addEventListener("resize", function () {
@@ -101,10 +112,13 @@
                 }
             });
 
+            document.addEventListener("touchend", function () {
+                isDragging = false;
+            });
+
             document.addEventListener("touchmove", function (e) {
                 if (!isDragging || e.touches.length !== 1) return;
-                
-                let touch = e.touches[0];
+                let touch = e.touches[0]; // Captura la posición del dedo
                 let deltaX = touch.clientX - previousMousePosition.x;
                 let deltaY = touch.clientY - previousMousePosition.y;
 
@@ -114,10 +128,6 @@
 
                 previousMousePosition = { x: touch.clientX, y: touch.clientY };
                 e.preventDefault(); // Evitar el desplazamiento de la página
-            });
-
-            document.addEventListener("touchend", function () {
-                isDragging = false;
             });
 
             init();
